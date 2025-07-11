@@ -16,7 +16,15 @@ import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ZodValidationPipe } from 'src/pipes/zod-validation.pipe';
 import { CreateVehicleSchema } from './schema/create-vehicle.schema';
-import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
+import { UpdateVehicleSchema } from './schema/update-vehicle.schema';
+import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 
 @ApiBearerAuth('jwt')
 @Controller('vehicles')
@@ -145,30 +153,81 @@ export class VehiclesController {
       },
     },
   })
-  async create(@Request() req, @Body() createVehicleDto: CreateVehicleDto) {
+  async create(@Body() createVehicleDto: CreateVehicleDto, @Request() req) {
     return this.vehiclesService.create(req.user.id, createVehicleDto);
   }
 
+  @ApiOperation({ summary: 'Listar veículos do usuário' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de veículos do usuário',
+    schema: {
+      example: [
+        {
+          id: 1,
+          brand: 'Toyota',
+          model: 'Corolla',
+          year: 2020,
+          price: 70000,
+          description: 'Carro seminovo',
+          images: [],
+        },
+      ],
+    },
+  })
   @Get()
   async findAll(@Request() req) {
     return this.vehiclesService.findAllByOwner(req.user.id);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar veículo específico' })
+  @ApiResponse({
+    status: 200,
+    description: 'Dados do veículo',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Veículo não encontrado',
+  })
   async findOne(@Param('id', ParseIntPipe) id: number, @Request() req) {
     return this.vehiclesService.findOneByOwner(id, req.user.id);
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Atualizar veículo' })
+  @ApiResponse({
+    status: 200,
+    description: 'Veículo atualizado com sucesso',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados de entrada inválidos',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Veículo não encontrado',
+  })
+  @ApiBody({ type: UpdateVehicleDto })
+  @ApiConsumes('application/json')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Request() req,
-    @Body() updateVehicleDto: Partial<CreateVehicleDto>,
+    @Body(new ZodValidationPipe(UpdateVehicleSchema)) updateVehicleDto: any,
   ) {
     return this.vehiclesService.update(id, req.user.id, updateVehicleDto);
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Deletar veículo' })
+  @ApiResponse({
+    status: 200,
+    description: 'Veículo deletado com sucesso',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Veículo não encontrado',
+  })
   async remove(@Param('id', ParseIntPipe) id: number, @Request() req) {
     return this.vehiclesService.remove(id, req.user.id);
   }

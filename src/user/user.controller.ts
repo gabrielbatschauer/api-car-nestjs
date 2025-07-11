@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UsePipes,
-} from '@nestjs/common';
+import { Controller, Post, Body, UsePipes } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ZodValidationPipe } from 'src/pipes/zod-validation.pipe';
@@ -85,7 +76,6 @@ export class UserController {
       },
     },
   })
-  @ApiBody({ type: CreateUserDto, description: 'Dados do usuário' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }

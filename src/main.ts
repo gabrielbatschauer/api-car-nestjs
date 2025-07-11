@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { patchNestjsSwagger } from '@anatine/zod-nestjs';
 import { ZodExceptionFilter } from './filters/zod-exception.filter';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -45,6 +46,8 @@ Esta API permite que lojistas gerenciem seus estoques de veículos com seguranç
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
+  app.use(express.json());
 
   await app.listen(process.env.PORT ?? 3000);
 }

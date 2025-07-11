@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
+import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 
 @Injectable()
 export class VehiclesService {
@@ -49,7 +50,7 @@ export class VehiclesService {
     return vehicle;
   }
 
-  async update(id: number, userId: number, data: Partial<CreateVehicleDto>) {
+  async update(id: number, userId: number, data: UpdateVehicleDto) {
     const vehicle = await this.findOneByOwner(id, userId);
 
     return this.prisma.vehicle.update({
