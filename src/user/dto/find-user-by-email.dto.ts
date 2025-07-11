@@ -1,0 +1,11 @@
+// src/user/dto/find-user-by-email.dto.ts
+
+import { ApiProperty } from '@nestjs/swagger';
+
+export class FindUserByEmailDto {
+  @ApiProperty({
+    example: 'usuario@gmail.com',
+    description: 'E-mail completo do usuário',
+  })
+  email!: string;
+}
