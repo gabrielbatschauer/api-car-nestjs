@@ -53,19 +53,43 @@ export class VehiclesService {
   async update(id: number, userId: number, data: UpdateVehicleDto) {
     const vehicle = await this.findOneByOwner(id, userId);
 
-    return this.prisma.vehicle.update({
-      where: { id },
-      data: {
-        brand: data.brand ?? vehicle.brand,
-        model: data.model ?? vehicle.model,
-        year: data.year ?? vehicle.year,
-        price: data.price ?? vehicle.price,
-        description: data.description ?? vehicle.description,
-        // Atualização de imagens deixamos pra depois ou implementar separado
-      },
-      include: {
-        images: true,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      // Atualiza campos básicos do veículo
+      const updatedVehicle = await tx.vehicle.update({
+        where: { id },
+        data: {
+          brand: data.brand ?? vehicle.brand,
+          model: data.model ?? vehicle.model,
+          year: data.year ?? vehicle.year,
+          price: data.price ?? vehicle.price,
+          description: data.description ?? vehicle.description,
+        },
+      });
+
+      // Atualiza imagens somente se data.images EXISTIR (undefined = não mexe)
+      if (data.images !== undefined) {
+        // Apaga as imagens antigas
+        await tx.image.deleteMany({
+          where: { vehicleId: id },
+        });
+
+        // Cria as novas imagens (se tiver alguma)
+        if (data.images.length > 0) {
+          await tx.image.createMany({
+            data: data.images.map((img) => ({
+              name: img.name,
+              url: img.url,
+              vehicleId: id,
+            })),
+          });
+        }
+      }
+
+      // Retorna o veículo atualizado com imagens
+      return tx.vehicle.findUnique({
+        where: { id },
+        include: { images: true },
+      });
     });
   }
 
