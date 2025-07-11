@@ -21,6 +21,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiOperation,
+  ApiParam,
   ApiResponse,
 } from '@nestjs/swagger';
 import { UpdateVehicleSchema } from './schema/update-vehicle.schema';
@@ -38,6 +39,40 @@ export class VehiclesController {
     summary:
       'Criação de um veículo relacionando ID do usuário e ID das imagens',
   })
+  @ApiConsumes('application/json')
+  @ApiBody({
+    type: CreateVehicleDto,
+    description:
+      'Dados necessários para criar um veículo com imagens opcionais',
+    examples: {
+      CriarComImagens: {
+        summary: 'Criar veículo com imagens',
+        value: {
+          brand: 'Toyota',
+          model: 'Corolla',
+          year: 1980,
+          price: 70000,
+          description: 'Carro seminovo em ótimo estado',
+          images: [
+            {
+              name: 'Foto frontal do carro',
+              url: 'https://meusite.com/imagem1.jpg',
+            },
+          ],
+        },
+      },
+      CriarSemImagens: {
+        summary: 'Criar veículo sem imagens',
+        value: {
+          brand: 'Ford',
+          model: 'Fiesta',
+          year: 2010,
+          price: 30000,
+          description: 'Carro usado, mas em bom estado',
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 201,
     description: 'Veículo inserido no banco de dados',
@@ -45,7 +80,7 @@ export class VehiclesController {
       'application/json': {
         examples: {
           CarroCriado: {
-            summary: 'Dados do carro',
+            summary: 'Dados do carro criado',
             value: {
               id: 1,
               brand: 'Toyota',
@@ -62,24 +97,6 @@ export class VehiclesController {
                   vehicleId: 7,
                 },
               ],
-            },
-          },
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Sem autorização para a rota',
-    content: {
-      'application/json': {
-        examples: {
-          NomeVazio: {
-            summary: 'Sem autorização',
-            value: {
-              message: 'Unauthorized',
-              error: 'Unauthorized',
-              statusCode: 401,
             },
           },
         },
@@ -153,17 +170,67 @@ export class VehiclesController {
       },
     },
   })
+  @ApiResponse({
+    status: 401,
+    description: 'Sem autorização para a rota',
+    content: {
+      'application/json': {
+        examples: {
+          Unauthorized: {
+            summary: 'Sem autorização',
+            value: {
+              message: 'Unauthorized',
+              error: 'Unauthorized',
+              statusCode: 401,
+            },
+          },
+        },
+      },
+    },
+  })
   async create(@Body() createVehicleDto: CreateVehicleDto, @Request() req) {
     return this.vehiclesService.create(req.user.id, createVehicleDto);
   }
 
+  @Get()
   @ApiOperation({ summary: 'Listar veículos do usuário' })
   @ApiResponse({
     status: 200,
     description: 'Lista de veículos do usuário',
-    schema: {
-      example: [
-        {
+    content: {
+      'application/json': {
+        example: [
+          {
+            id: 1,
+            brand: 'Toyota',
+            model: 'Corolla',
+            year: 2020,
+            price: 70000,
+            description: 'Carro seminovo',
+            images: [],
+          },
+        ],
+      },
+    },
+  })
+  async findAll(@Request() req) {
+    return this.vehiclesService.findAllByOwner(req.user.id);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Buscar veículo específico' })
+  @ApiParam({
+    name: 'id',
+    type: 'integer',
+    description: 'ID do veículo a ser buscado',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Dados do veículo',
+    content: {
+      'application/json': {
+        example: {
           id: 1,
           brand: 'Toyota',
           model: 'Corolla',
@@ -172,44 +239,120 @@ export class VehiclesController {
           description: 'Carro seminovo',
           images: [],
         },
-      ],
+      },
     },
-  })
-  @Get()
-  async findAll(@Request() req) {
-    return this.vehiclesService.findAllByOwner(req.user.id);
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Buscar veículo específico' })
-  @ApiResponse({
-    status: 200,
-    description: 'Dados do veículo',
   })
   @ApiResponse({
     status: 404,
     description: 'Veículo não encontrado',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Veículo não encontrado',
+        },
+      },
+    },
   })
   async findOne(@Param('id', ParseIntPipe) id: number, @Request() req) {
     return this.vehiclesService.findOneByOwner(id, req.user.id);
   }
 
   @Put(':id')
+  @UsePipes(new ZodValidationPipe(UpdateVehicleSchema))
   @ApiOperation({ summary: 'Atualizar veículo' })
+  @ApiParam({
+    name: 'id',
+    type: 'integer',
+    description: 'ID do veículo que será atualizado',
+    example: 1,
+  })
+  @ApiConsumes('application/json')
+  @ApiBody({
+    type: UpdateVehicleDto,
+    description:
+      'Atualiza um veículo. Se o campo "images" for enviado, ele substituirá todas as imagens existentes. ' +
+      'Se omitido, as imagens atuais serão mantidas. Se enviado como array vazio, todas as imagens serão removidas.',
+    examples: {
+      AtualizarComImagens: {
+        summary: 'Atualizar veículo com novas imagens',
+        value: {
+          brand: 'Toyota',
+          images: [
+            { name: 'Frontal', url: 'https://site.com/img1.jpg' },
+            { name: 'Lateral', url: 'https://site.com/img2.jpg' },
+          ],
+        },
+      },
+      AtualizarSemAlterarImagens: {
+        summary: 'Atualizar veículo sem mexer nas imagens',
+        value: {
+          brand: 'Toyota',
+          model: 'Corolla',
+        },
+      },
+      AtualizarRemovendoImagens: {
+        summary: 'Atualizar veículo removendo todas as imagens',
+        value: {
+          brand: 'Toyota',
+          images: [],
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'Veículo atualizado com sucesso',
+    content: {
+      'application/json': {
+        example: {
+          id: 1,
+          brand: 'Toyota',
+          model: 'Corolla',
+          year: 2020,
+          price: 70000,
+          description: 'Carro seminovo em ótimo estado',
+          images: [
+            { id: 1, name: 'Frontal', url: 'https://site.com/img1.jpg' },
+            { id: 2, name: 'Lateral', url: 'https://site.com/img2.jpg' },
+          ],
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 400,
     description: 'Dados de entrada inválidos',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 400,
+          error: 'Bad Request',
+          details: [
+            {
+              path: 'brand',
+              message: 'Marca obrigatória',
+              code: 'invalid_type',
+            },
+          ],
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 404,
     description: 'Veículo não encontrado',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Veículo não encontrado',
+        },
+      },
+    },
   })
-  @ApiBody({ type: UpdateVehicleDto })
-  @ApiConsumes('application/json')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Request() req,
@@ -220,13 +363,35 @@ export class VehiclesController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Deletar veículo' })
+  @ApiParam({
+    name: 'id',
+    type: 'integer',
+    description: 'ID do veículo que será deletado',
+    example: 1,
+  })
   @ApiResponse({
     status: 200,
     description: 'Veículo deletado com sucesso',
+    content: {
+      'application/json': {
+        example: {
+          message: 'Veículo Toyota Corolla deletado com sucesso',
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 404,
     description: 'Veículo não encontrado',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Veículo não encontrado',
+        },
+      },
+    },
   })
   async remove(@Param('id', ParseIntPipe) id: number, @Request() req) {
     return this.vehiclesService.remove(id, req.user.id);

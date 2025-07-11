@@ -96,6 +96,11 @@ export class VehiclesService {
   async remove(id: number, userId: number) {
     await this.findOneByOwner(id, userId);
 
-    return this.prisma.vehicle.delete({ where: { id } });
+    const deleted = await this.prisma.vehicle.delete({ where: { id } });
+    if (deleted) {
+      return {
+        message: `Veículo ${deleted.brand} ${deleted.model} deletado com sucesso`,
+      };
+    }
   }
 }
