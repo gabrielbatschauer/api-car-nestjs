@@ -59,6 +59,7 @@ export class VehiclesService {
         model: data.model ?? vehicle.model,
         year: data.year ?? vehicle.year,
         price: data.price ?? vehicle.price,
+        description: data.description ?? vehicle.description,
         // Atualização de imagens deixamos pra depois ou implementar separado
       },
       include: {
