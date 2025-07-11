@@ -33,5 +33,5 @@ model Image {
   name      String
   url       String
   vehicleId Int
-  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
 }
