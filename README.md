@@ -44,26 +44,52 @@ cd api-car-nestjs
 npm install
 ```
 
-### 3. Crie o arquivo `.env` com suas credenciais
+### 3. Utilizando a imagem MySQL com Docker (Caso possua um banco já configurado pule para o passo 3)
+Modifique o docker-compose-mysql.yml colocando o nome da DATABASE que preferir
+```bash
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_nest_prisma
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: admin # Senha do banco
+      MYSQL_DATABASE: api_nestjs # Nome do banco
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
+```
+Suba o banco e verifique se foi iniciado corretamente
+```bash
+docker-compose up -d
+docker ps
+```
+
+### 4. Crie o arquivo `.env` com suas credenciais
 
 Copie o arquivo de exemplo
 ```bash
 cp .env.example .env
 ```
-Modifique seu .env com suas credenciais e sua chave JWT (Chave aleatória)
+Modifique seu .env com suas credenciais configuradas no passo 3 e sua chave JWT (Chave aleatória)
 ```bash
 JWT_SECRET="senha_segura"
 
 DATABASE_URL="mysql://usuario:senha@localhost:3306/nome_do_banco"
 ```
 
-### 4. Iniciando o Prisma
+### 5. Iniciando o Prisma
 
 ```bash
 npx prisma migrate dev --name init
 ```
 
-### 5. Rode a aplicação em modo dev
+### 6. Rode a aplicação em modo dev
 
 ```bash
 npm run start:dev
