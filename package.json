@@ -1,8 +1,8 @@
 {
-  "name": "prisma",
+  "name": "api-car-nestjs",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "API para controlar estoque de lojas de carro",
+  "author": "Gabriel Batschauer",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
