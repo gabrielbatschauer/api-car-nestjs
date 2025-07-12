@@ -37,7 +37,6 @@ import { FilterVehiclesDto } from './schema/filter-vehicle.schema';
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
-  @UsePipes(new ZodValidationPipe(CreateVehicleSchema))
   @Post()
   @ApiOperation({
     summary:
@@ -192,6 +191,7 @@ export class VehiclesController {
       },
     },
   })
+  @UsePipes(new ZodValidationPipe(CreateVehicleSchema))
   async create(@Body() createVehicleDto: CreateVehicleDto, @Request() req) {
     return this.vehiclesService.create(req.user.id, createVehicleDto);
   }

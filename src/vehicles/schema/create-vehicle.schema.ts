@@ -7,10 +7,10 @@ export const CreateVehicleSchema = z.object({
   year: z
     .number()
     .int()
+    .min(1, 'Ano Obrigatório')
     .refine((val) => val.toString().length === 4, {
       message: 'Ano deve ter exatamente 4 dígitos',
     }),
-
   price: z.number().min(1, 'Valor obrigatório'),
   description: z.string().optional(),
   images: z.array(CreateImageSchema).optional(),
