@@ -10,6 +10,8 @@ import {
   Request,
   ParseIntPipe,
   UsePipes,
+  Query,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
@@ -20,12 +22,16 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiExtraModels,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
 import { UpdateVehicleSchema } from './schema/update-vehicle.schema';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { FilterVehiclesDto } from './dto/filter-vehicles.dto';
+import { string } from 'zod';
 
 @ApiBearerAuth('jwt')
 @Controller('vehicles')
@@ -213,8 +219,31 @@ export class VehiclesController {
       },
     },
   })
-  async findAll(@Request() req) {
-    return this.vehiclesService.findAllByOwner(req.user.id);
+  @ApiExtraModels(FilterVehiclesDto)
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Número da página de busca',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Quantidade de veículos retornados por página',
+    type: Number,
+  })
+  @ApiQuery({ name: 'brand', required: false, type: string })
+  async findAll(@Request() req, @Query() query: FilterVehiclesDto) {
+    const { page, limit, brand } = query;
+
+    const parsedPage = page ? parseInt(page, 10) : 1;
+    const parsedLimit = limit ? parseInt(limit, 10) : 10;
+    return this.vehiclesService.findAllByOwner(
+      req.user.id,
+      parsedPage,
+      parsedLimit,
+      brand,
+    );
   }
 
   @Get(':id')

@@ -30,10 +30,18 @@ export class VehiclesService {
     });
   }
 
-  async findAllByOwner(userId: number) {
+  async findAllByOwner(userId: number, page = 1, limit = 10, brand?: string) {
+    const skip = (page - 1) * limit;
+
     return this.prisma.vehicle.findMany({
-      where: { userId: userId },
-      include: { images: true },
+      where: {
+        userId,
+        brand: {
+          contains: brand,
+        },
+      },
+      skip,
+      take: limit,
     });
   }
 
