@@ -26,12 +26,12 @@ import {
   ApiExtraModels,
   ApiOperation,
   ApiParam,
-  ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
 import { UpdateVehicleSchema } from './schema/update-vehicle.schema';
 import { UpdateVehicleDto } from './schema/update-vehicle.schema';
 import { FilterVehiclesDto } from './schema/filter-vehicle.schema';
+import { ApiZodQueryParams } from './decorators/api-zod.decorator';
 
 @ApiBearerAuth('jwt')
 @Controller('vehicles')
@@ -222,38 +222,13 @@ export class VehiclesController {
     },
   })
   @ApiExtraModels(FilterVehiclesDto)
-  @ApiQuery({
-    name: 'page',
-    example: 1,
-    required: false,
-    description: 'Número da página de busca',
-    type: Number,
-  })
-  @ApiQuery({
-    name: 'limit',
-    example: 10,
-    required: false,
-    description: 'Quantidade de veículos retornados por página',
-    type: Number,
-  })
-  @ApiQuery({
-    name: 'brand',
-    required: false,
-    description: 'Marca que deseja filtrar',
-    type: String,
-  })
-  @ApiQuery({
-    name: 'model',
-    required: false,
-    description: 'Modelo do carro para filtrar',
-    type: String,
-  })
-  @ApiQuery({
-    name: 'year',
-    required: false,
-    description: 'Ano que deseja filtrar',
-    type: Number,
-  })
+  @ApiZodQueryParams(FilterVehiclesDto, [
+    { name: 'page', type: String, example: '1' },
+    { name: 'limit', type: String, example: '10' },
+    { name: 'brand', type: String },
+    { name: 'model', type: String },
+    { name: 'year', type: String },
+  ])
   async findAll(@Request() req, @Query() query: FilterVehiclesDto) {
     const { page, limit, brand, model, year } = query;
 
