@@ -30,6 +30,9 @@ Esta API permite que lojistas gerenciem seus estoques de veículos com seguranç
  **Cada usuário só acessa os veículos que ele criou.**
 
 ---
+Rotas de **usuários** contém DTO e Schemas, utilizando os Schemas para validação com Zod e DTO para validar objetos, **possuindo Schema**.
+
+Rotas de **veículos** contém apenas Schemas, exportando as mesmas com **'export class nomeDoDto extends createZodDto(NomeDoSchema)) {}'**, portando **não possuem Schemas** dentro do Swagger
 `,
     )
     .setVersion('1.0')

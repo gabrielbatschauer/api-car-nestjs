@@ -1,4 +1,3 @@
-// decorators/api-zod-query.decorator.ts
 import { applyDecorators } from '@nestjs/common';
 import { ApiExtraModels, ApiQuery } from '@nestjs/swagger';
 
