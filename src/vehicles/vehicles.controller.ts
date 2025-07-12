@@ -31,7 +31,6 @@ import {
 import { UpdateVehicleSchema } from './schema/update-vehicle.schema';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { FilterVehiclesDto } from './dto/filter-vehicles.dto';
-import { string } from 'zod';
 
 @ApiBearerAuth('jwt')
 @Controller('vehicles')
@@ -199,7 +198,9 @@ export class VehiclesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar veículos do usuário' })
+  @ApiOperation({
+    summary: 'Listar veículos do usuário com paginação e filtros',
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de veículos do usuário',
@@ -222,27 +223,52 @@ export class VehiclesController {
   @ApiExtraModels(FilterVehiclesDto)
   @ApiQuery({
     name: 'page',
+    example: 1,
     required: false,
     description: 'Número da página de busca',
     type: Number,
   })
   @ApiQuery({
     name: 'limit',
+    example: 10,
     required: false,
     description: 'Quantidade de veículos retornados por página',
     type: Number,
   })
-  @ApiQuery({ name: 'brand', required: false, type: string })
+  @ApiQuery({
+    name: 'brand',
+    example: 'Toyota',
+    required: false,
+    description: 'Marca que deseja filtrar',
+    type: String,
+  })
+  @ApiQuery({
+    name: 'model',
+    example: 'Camry',
+    required: false,
+    description: 'Modelo do carro para filtrar',
+    type: String,
+  })
+  @ApiQuery({
+    name: 'year',
+    example: 2020,
+    required: false,
+    description: 'Ano que deseja filtrar',
+    type: Number,
+  })
   async findAll(@Request() req, @Query() query: FilterVehiclesDto) {
-    const { page, limit, brand } = query;
+    const { page, limit, brand, model, year } = query;
 
     const parsedPage = page ? parseInt(page, 10) : 1;
     const parsedLimit = limit ? parseInt(limit, 10) : 10;
+    const parsedYear = year ? parseInt(year, 10) : undefined;
     return this.vehiclesService.findAllByOwner(
       req.user.id,
       parsedPage,
       parsedLimit,
       brand,
+      model,
+      parsedYear,
     );
   }
 
@@ -289,11 +315,10 @@ export class VehiclesController {
   }
 
   @Put(':id')
-  @UsePipes(new ZodValidationPipe(UpdateVehicleSchema))
   @ApiOperation({ summary: 'Atualizar veículo' })
   @ApiParam({
     name: 'id',
-    type: 'integer',
+    type: Number,
     description: 'ID do veículo que será atualizado',
     example: 1,
   })
