@@ -11,7 +11,6 @@ import {
   ParseIntPipe,
   UsePipes,
   Query,
-  DefaultValuePipe,
 } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
