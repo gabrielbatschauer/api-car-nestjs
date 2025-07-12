@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CreateImageSchema } from './create-image.schema';
+import { createZodDto } from 'nestjs-zod';
 
 export const CreateVehicleSchema = z.object({
   brand: z.string().min(1, 'Marca obrigatória'),
@@ -13,5 +14,7 @@ export const CreateVehicleSchema = z.object({
     }),
   price: z.number().min(1, 'Valor obrigatório'),
   description: z.string().optional(),
-  images: z.array(CreateImageSchema).optional(),
+  images: z.array(CreateImageSchema).optional().nullable(),
 });
+
+export class CreateVehicleDto extends createZodDto(CreateVehicleSchema) {}

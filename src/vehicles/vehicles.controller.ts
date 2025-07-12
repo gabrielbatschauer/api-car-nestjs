@@ -13,10 +13,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
-import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ZodValidationPipe } from 'src/pipes/zod-validation.pipe';
-import { CreateVehicleSchema } from './schema/create-vehicle.schema';
+import {
+  CreateVehicleDto,
+  CreateVehicleSchema,
+} from './schema/create-vehicle.schema';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -28,7 +30,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { UpdateVehicleSchema } from './schema/update-vehicle.schema';
-import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { UpdateVehicleDto } from './schema/update-vehicle.schema';
 import { FilterVehiclesDto } from './schema/filter-vehicle.schema';
 
 @ApiBearerAuth('jwt')
@@ -236,21 +238,18 @@ export class VehiclesController {
   })
   @ApiQuery({
     name: 'brand',
-    example: 'Toyota',
     required: false,
     description: 'Marca que deseja filtrar',
     type: String,
   })
   @ApiQuery({
     name: 'model',
-    example: 'Camry',
     required: false,
     description: 'Modelo do carro para filtrar',
     type: String,
   })
   @ApiQuery({
     name: 'year',
-    example: 2020,
     required: false,
     description: 'Ano que deseja filtrar',
     type: Number,

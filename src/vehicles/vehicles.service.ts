@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateVehicleDto } from './dto/create-vehicle.dto';
-import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { UpdateVehicleDto } from './schema/update-vehicle.schema';
+import { CreateVehicleDto } from './schema/create-vehicle.schema';
 
 @Injectable()
 export class VehiclesService {
@@ -55,6 +55,7 @@ export class VehiclesService {
           },
         ],
       },
+      include: { images: true },
       skip,
       take: limit,
     });
