@@ -1,6 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
-import { CreateImageDto, CreateImageSchema } from './create-image.schema';
+import { CreateImageSchema } from './create-image.schema';
 
 export const UpdateVehicleSchema = z.object({
   brand: z.string().min(1, 'Marca obrigatória').max(50).optional(),
