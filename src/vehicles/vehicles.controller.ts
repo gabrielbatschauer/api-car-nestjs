@@ -30,7 +30,7 @@ import {
 } from '@nestjs/swagger';
 import { UpdateVehicleSchema } from './schema/update-vehicle.schema';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
-import { FilterVehiclesDto } from './dto/filter-vehicles.dto';
+import { FilterVehiclesDto } from './schema/filter-vehicle.schema';
 
 @ApiBearerAuth('jwt')
 @Controller('vehicles')
