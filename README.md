@@ -44,7 +44,7 @@ cd api-car-nestjs
 npm install
 ```
 
-### 3. Utilizando a imagem MySQL com Docker (Caso possua um banco já configurado pule para o passo 3)
+### 3. Utilizando a imagem MySQL com Docker (Caso possua um banco já configurado pule para o passo 4)
 Modifique o docker-compose-mysql.yml colocando o nome da DATABASE que preferir
 ```bash
 services:
